@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="_sort">Sort</string>
+    <string name="_select_sort_option">Select Sort Option</string>
+    <string name="_increasing">Lowest</string>
+    <string name="_decreasing">Highest</string>
 </resources>

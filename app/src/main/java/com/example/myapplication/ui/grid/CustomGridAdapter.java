@@ -89,6 +89,12 @@ public class CustomGridAdapter extends BaseAdapter {
     }
     ImageView imageView = grid.findViewById(R.id.image);
     Picasso.get().load(Constants.TMDB_IMAGE_PATH + movies.get(position).getBackdrop_path()).into(imageView);
+    TextView title = grid.findViewById(R.id.text_title);
+    TextView rating = grid.findViewById(R.id.text_rating);
+    TextView popularity = grid.findViewById(R.id.text_popularity);
+    title.setText(movies.get(position).getTitle());
+    rating.setText("(Rating: " + movies.get(position).getVote_average() + ")");
+    popularity.setText("(Popularity: " + movies.get(position).getPopularity() + ")");
     return grid;
   }
 }
