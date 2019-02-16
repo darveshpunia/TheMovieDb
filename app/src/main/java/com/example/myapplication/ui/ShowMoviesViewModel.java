@@ -5,6 +5,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.myapplication.R;
 import com.example.myapplication.injection.MovieDbApplication;
 import com.example.myapplication.models.TheMovieDbObject;
 import com.example.myapplication.repository.MoviesDataRepository;
@@ -45,7 +46,7 @@ public class ShowMoviesViewModel extends AndroidViewModel {
         .subscribe(movies -> {
           movieList.setValue(movies.getResults());
         }, ex -> {
-          Toast.makeText(context, "Something went wrong!", Toast.LENGTH_LONG).show();
+          Toast.makeText(context, context.getString(R.string._something_went_wrong), Toast.LENGTH_LONG).show();
           ex.printStackTrace();
         })
     );
@@ -53,5 +54,12 @@ public class ShowMoviesViewModel extends AndroidViewModel {
 
   public LiveData<List<TheMovieDbObject.MovieData>> getMovieList(){
     return movieList;
+  }
+
+  @Override
+  protected void onCleared() {
+    super.onCleared();
+    if(compositeDisposable != null)
+      compositeDisposable.clear();
   }
 }

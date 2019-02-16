@@ -1,5 +1,7 @@
 package com.example.myapplication.models;
 
+import org.parceler.Parcel;
+
 import java.util.List;
 
 public class TheMovieDbObject {
@@ -32,7 +34,8 @@ public class TheMovieDbObject {
     this.page = page;
   }
 
-  public class MovieData{
+  @Parcel
+  public static class MovieData{
     int vote_count;
     int id;
     boolean video;
