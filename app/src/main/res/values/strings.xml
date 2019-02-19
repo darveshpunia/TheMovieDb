@@ -9,4 +9,6 @@
     <string name="could_not_connect_please_try_again">Could Not Connect! Please Try Again!</string>
     <string name="retry">Retry</string>
     <string name="_something_went_wrong_please_try_again">Something went wrong! Please Try Again!</string>
+    <string name="_rating">Rating</string>
+    <string name="_popularity">Popularity</string>
 </resources>

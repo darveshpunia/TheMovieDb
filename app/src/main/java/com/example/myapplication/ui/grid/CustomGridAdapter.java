@@ -36,25 +36,25 @@ public class CustomGridAdapter extends BaseAdapter {
   }
 
   public enum SortOptions {
-    RATING("Rating",
+    RATING(R.string._rating,
         (m1, m2) -> Float.compare(m1.getVote_average(), m2.getVote_average())),
 
-    POPULARITY("Popularity",
+    POPULARITY(R.string._popularity,
         (m1, m2) -> Float.compare(m1.getPopularity(), m2.getPopularity()));
 
-    private String type;
+    private int stringResId;
     private Comparator<TheMovieDbObject.MovieData> comparator;
 
-    public String getType() {
-      return type;
+    public int getStringResId() {
+      return stringResId;
     }
 
     public Comparator<TheMovieDbObject.MovieData> getComparator() {
       return comparator;
     }
 
-    SortOptions(String type, Comparator<TheMovieDbObject.MovieData> comparator){
-      this.type = type;
+    SortOptions(int stringResId, Comparator<TheMovieDbObject.MovieData> comparator){
+      this.stringResId = stringResId;
       this.comparator = comparator;
     }
   }
@@ -95,8 +95,8 @@ public class CustomGridAdapter extends BaseAdapter {
     TextView rating = grid.findViewById(R.id.text_rating);
     TextView popularity = grid.findViewById(R.id.text_popularity);
     title.setText(movies.get(position).getTitle());
-    rating.setText("(Rating: " + movies.get(position).getVote_average() + ")");
-    popularity.setText("(Popularity: " + movies.get(position).getPopularity() + ")");
+    rating.setText("("+context.getString(R.string._rating)+": " + movies.get(position).getVote_average() + ")");
+    popularity.setText("("+context.getString(R.string._popularity)+": " + movies.get(position).getPopularity() + ")");
     grid.setOnClickListener(v -> {
       ShowMovieDetailsActivity.startActivity(context, movies.get(position));
     });

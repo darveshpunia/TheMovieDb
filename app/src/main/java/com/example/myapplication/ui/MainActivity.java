@@ -137,7 +137,7 @@ public class MainActivity extends BaseActivity {
   private void showSortDialog() {
     new MaterialDialog.Builder(this)
         .title(R.string._select_sort_option)
-        .items(Stream.of(sortOptions).map(CustomGridAdapter.SortOptions::getType).toList())
+        .items(Stream.of(sortOptions).map(option -> getString(option.getStringResId())).toList())
         .itemsCallbackSingleChoice(0,
             (dialog, view, which, text) -> true)
         .positiveText(R.string._increasing)
