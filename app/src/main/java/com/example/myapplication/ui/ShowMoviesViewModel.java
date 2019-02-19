@@ -2,17 +2,17 @@ package com.example.myapplication.ui;
 
 import android.app.Application;
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.example.myapplication.R;
 import com.example.myapplication.injection.MovieDbApplication;
 import com.example.myapplication.models.TheMovieDbObject;
+import com.example.myapplication.models.ApiResponse;
 import com.example.myapplication.repository.MoviesDataRepository;
-import com.example.myapplication.repository.MoviesRepository;
-import com.example.myapplication.util.Constants;
-import com.google.gson.GsonBuilder;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -21,8 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-import io.reactivex.Flowable;
 import io.reactivex.disposables.CompositeDisposable;
 
 public class ShowMoviesViewModel extends AndroidViewModel {
@@ -30,7 +28,10 @@ public class ShowMoviesViewModel extends AndroidViewModel {
   MoviesDataRepository moviesDataRepository;
   CompositeDisposable compositeDisposable = new CompositeDisposable();
   Context context;
-  private MutableLiveData<List<TheMovieDbObject.MovieData>> movieList = new MutableLiveData<>();
+  private MutableLiveData<ApiResponse<List<TheMovieDbObject.MovieData>>> movieList = new MutableLiveData<>();
+  ApiResponse<List<TheMovieDbObject.MovieData>> dataState;
+
+  public static String CONNECTION_ISSUE = "CONNECTION_ISSUE";
 
   public ShowMoviesViewModel(@NonNull Application application) {
     super(application);
@@ -44,15 +45,27 @@ public class ShowMoviesViewModel extends AndroidViewModel {
         moviesDataRepository
         .getPopularMovies(language, page)
         .subscribe(movies -> {
-          movieList.setValue(movies.getResults());
-        }, ex -> {
-          Toast.makeText(context, context.getString(R.string._something_went_wrong), Toast.LENGTH_LONG).show();
-          ex.printStackTrace();
+          setDataState(true, movies.getResults(), null);
+          movieList.setValue(dataState);
+        }, throwable -> {
+          if (throwable instanceof SocketTimeoutException || throwable instanceof UnknownHostException || throwable instanceof ConnectException) {
+            setDataState(false, null, CONNECTION_ISSUE);
+          } else
+            setDataState(false, null, null);
+          movieList.setValue(dataState);
+          throwable.printStackTrace();
         })
     );
   }
 
-  public LiveData<List<TheMovieDbObject.MovieData>> getMovieList(){
+  void setDataState(boolean success, List<TheMovieDbObject.MovieData> data, String error){
+    dataState = new ApiResponse<>();
+    dataState.setSuccess(success);
+    dataState.setData(data);
+    dataState.setError(error);
+  }
+
+  public LiveData<ApiResponse<List<TheMovieDbObject.MovieData>>> getMovieList(){
     return movieList;
   }
 

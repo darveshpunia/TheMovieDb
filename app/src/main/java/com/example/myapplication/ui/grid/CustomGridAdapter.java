@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import com.example.myapplication.R;
 import com.example.myapplication.models.TheMovieDbObject;
+import com.example.myapplication.ui.MainActivity;
+import com.example.myapplication.ui.moviedetails.ShowMovieDetailsActivity;
 import com.example.myapplication.util.Constants;
 import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
@@ -95,6 +97,9 @@ public class CustomGridAdapter extends BaseAdapter {
     title.setText(movies.get(position).getTitle());
     rating.setText("(Rating: " + movies.get(position).getVote_average() + ")");
     popularity.setText("(Popularity: " + movies.get(position).getPopularity() + ")");
+    grid.setOnClickListener(v -> {
+      ShowMovieDetailsActivity.startActivity(context, movies.get(position));
+    });
     return grid;
   }
 }

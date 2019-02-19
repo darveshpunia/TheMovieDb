@@ -25,18 +25,20 @@ public class NetworkModule {
   public NetworkModule(MovieDbApplication application) {
     this.application = application;
   }
+  private final int TIMEOUT = 60;
 
   @Singleton
   @Provides
   OkHttpClient provideOkHttpClient(){
     HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
     logging.setLevel(BuildConfig.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-    java.net.Proxy proxy = new Proxy(Proxy.Type.HTTP,  new InetSocketAddress("198.211.108.71", 9000));
+    //added since the website was not working at my end
+//    java.net.Proxy proxy = new Proxy(Proxy.Type.HTTP,  new InetSocketAddress("198.211.108.71", 9000));
     return new OkHttpClient.Builder()
-        .proxy(proxy)
+//        .proxy(proxy)
         .addInterceptor(logging)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+        .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
         .build();
   }
 

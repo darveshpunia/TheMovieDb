@@ -5,4 +5,8 @@
     <string name="_increasing">Low to High</string>
     <string name="_decreasing">High to Low</string>
     <string name="_something_went_wrong">Something went wrong!</string>
+    <string name="_the_movie_db_app">The MovieDB App</string>
+    <string name="could_not_connect_please_try_again">Could Not Connect! Please Try Again!</string>
+    <string name="retry">Retry</string>
+    <string name="_something_went_wrong_please_try_again">Something went wrong! Please Try Again!</string>
 </resources>
