@@ -1,6 +1,6 @@
 # TheMovieDb App (For Fun & Learning)
 
-A simple app that uses concepts like RxJava, Retrofit, ViewModel, Live Data, Dagger 2, Picasso and Parcel
+A simple app that uses concepts like RxJava, Retrofit, ViewModel, Live Data, Dagger 2, Picasso, Parcel, etc
 
 #### Main Screen (showing data in a grid View)
 <img src="screens/myapplication/main_screen.PNG" width=250 alt="Main Screen"/>
