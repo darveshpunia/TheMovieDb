@@ -22,4 +22,8 @@ public class MoviesDataRepository {
     return dataManager.getPopularMovies(language, page);
   }
 
+  public Flowable<TheMovieDbObject> getTopRatedMovies(String language, int page){
+    return dataManager.getTopRatedMovies(language, page);
+  }
+
 }

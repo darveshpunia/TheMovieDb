@@ -15,4 +15,7 @@ public interface ITheMovieDBService {
 
   @GET("movie/popular?api_key=" + apiKey)
   Flowable<TheMovieDbObject> getPopularMovies(@Query("language") String language, @Query("page") int page);
+
+  @GET("movie/top_rated?api_key=" + apiKey)
+  Flowable<TheMovieDbObject> getTopRatedMovies(@Query("language") String language, @Query("page") int page);
 }

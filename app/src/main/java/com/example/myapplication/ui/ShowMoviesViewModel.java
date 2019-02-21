@@ -58,6 +58,24 @@ public class ShowMoviesViewModel extends AndroidViewModel {
     );
   }
 
+  public void getTopRatedMovies(String language, int page){
+    compositeDisposable.add(
+        moviesDataRepository
+        .getTopRatedMovies(language, page)
+        .subscribe(movies -> {
+          setDataState(true, movies.getResults(), null);
+          movieList.setValue(dataState);
+        }, throwable -> {
+          if (throwable instanceof SocketTimeoutException || throwable instanceof UnknownHostException || throwable instanceof ConnectException) {
+            setDataState(false, null, CONNECTION_ISSUE);
+          } else
+            setDataState(false, null, null);
+          movieList.setValue(dataState);
+          throwable.printStackTrace();
+        })
+    );
+  }
+
   void setDataState(boolean success, List<TheMovieDbObject.MovieData> data, String error){
     dataState = new ApiResponse<>();
     dataState.setSuccess(success);

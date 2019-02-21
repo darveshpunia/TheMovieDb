@@ -58,6 +58,8 @@ public class MainActivity extends BaseActivity {
   List<CustomGridAdapter.SortOptions> sortOptions;
   List<TheMovieDbObject.MovieData> movies;
 
+  CustomGridAdapter.SortOptions filterSelected;
+
   ShowMoviesViewModel showMoviesViewModel;
 
   @Override
@@ -68,9 +70,11 @@ public class MainActivity extends BaseActivity {
     ButterKnife.bind(this);
     // inject
     ((MovieDbApplication) getApplication()).getAppComponent().inject(this);
+    filterSelected = CustomGridAdapter.SortOptions.POPULARITY;
     sortOptions = new ArrayList<>(Arrays.asList(CustomGridAdapter.SortOptions.values()));
     showMoviesViewModel = ViewModelProviders.of(this).get(ShowMoviesViewModel.class);
     setUpViewMode();
+    getMovies();
   }
 
   private void setUpViewMode() {
@@ -80,9 +84,11 @@ public class MainActivity extends BaseActivity {
         gridView.setVisibility(View.VISIBLE);
         dataLoaded = true;
         invalidateOptionsMenu();
-        adapter = new CustomGridAdapter(this, items.getData());
-        adapter.sortFields(CustomGridAdapter.SortOptions.RATING, false);
-        gridView.setAdapter(adapter);
+        if (adapter == null) {
+          adapter = new CustomGridAdapter(this, items.getData());
+          gridView.setAdapter(adapter);
+        } else
+          adapter.refreshData(items.getData());
         movies = new ArrayList<>(items.getData());
       } else if (items.getError().equals(CONNECTION_ISSUE)) {
         handleLayout(true, null);
@@ -95,7 +101,6 @@ public class MainActivity extends BaseActivity {
   @Override
   protected void onResume() {
     super.onResume();
-    getMovies();
   }
 
   void handleLayout(boolean showErrorLayout, String errorMessage){
@@ -109,7 +114,7 @@ public class MainActivity extends BaseActivity {
   @OnClick(R.id.retry_btn)
   void getMovies() {
     handleLayout(false, null);
-    showMoviesViewModel.getPopularMovies(Constants.LANGUAGE_US_EN, Constants.POPULAR_MOVIES_PAGE);
+    getMostPopularMovies();
   }
 
   @Override
@@ -138,12 +143,35 @@ public class MainActivity extends BaseActivity {
     new MaterialDialog.Builder(this)
         .title(R.string._select_sort_option)
         .items(Stream.of(sortOptions).map(option -> getString(option.getStringResId())).toList())
-        .itemsCallbackSingleChoice(0,
-            (dialog, view, which, text) -> true)
-        .positiveText(R.string._increasing)
-        .onPositive((dialog, which) -> adapter.sortFields(sortOptions.get(dialog.getSelectedIndex()), true))
-        .neutralText(R.string._decreasing)
-        .onNeutral((dialog, which) -> adapter.sortFields(sortOptions.get(dialog.getSelectedIndex()), false))
+        .itemsCallbackSingleChoice(sortOptions.indexOf(filterSelected), (dialog, view, which, text) -> true)
+        .positiveText(getString(R.string._ok))
+        .onPositive((dialog, which) -> getData(sortOptions.get(dialog.getSelectedIndex())))
+        .neutralText(getString(R.string._cancel))
+        .onNeutral((dialog, which) -> dialog.dismiss())
         .show();
   }
+
+  void getMostPopularMovies(){
+    showMoviesViewModel.getPopularMovies(Constants.LANGUAGE_US_EN, Constants.POPULAR_MOVIES_PAGE);
+  }
+
+  void getTopRatedMovies(){
+    progressBar.setVisibility(View.VISIBLE);
+    gridView.setVisibility(View.GONE);
+    showMoviesViewModel.getTopRatedMovies(Constants.LANGUAGE_US_EN, Constants.POPULAR_MOVIES_PAGE);
+  }
+
+  void getData(CustomGridAdapter.SortOptions option){
+    switch (option){
+      case RATING:
+        getTopRatedMovies();
+        filterSelected = CustomGridAdapter.SortOptions.RATING;
+        break;
+      case POPULARITY:
+        getMostPopularMovies();
+        filterSelected = CustomGridAdapter.SortOptions.POPULARITY;
+        break;
+    }
+  }
+
 }

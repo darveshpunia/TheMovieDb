@@ -36,31 +36,22 @@ public class CustomGridAdapter extends BaseAdapter {
   }
 
   public enum SortOptions {
-    RATING(R.string._rating,
-        (m1, m2) -> Float.compare(m1.getVote_average(), m2.getVote_average())),
-
-    POPULARITY(R.string._popularity,
-        (m1, m2) -> Float.compare(m1.getPopularity(), m2.getPopularity()));
+    RATING(R.string._rating),
+    POPULARITY(R.string._popularity);
 
     private int stringResId;
-    private Comparator<TheMovieDbObject.MovieData> comparator;
 
     public int getStringResId() {
       return stringResId;
     }
 
-    public Comparator<TheMovieDbObject.MovieData> getComparator() {
-      return comparator;
-    }
-
-    SortOptions(int stringResId, Comparator<TheMovieDbObject.MovieData> comparator){
+    SortOptions(int stringResId){
       this.stringResId = stringResId;
-      this.comparator = comparator;
     }
   }
 
-  public void sortFields(SortOptions option, boolean ascending){
-    Collections.sort(movies, ascending ? option.getComparator() : (x, y) -> -option.getComparator().compare(x, y));
+  public void refreshData(List<TheMovieDbObject.MovieData> movies){
+    this.movies = new ArrayList<>(movies);
     notifyDataSetChanged();
   }
 
@@ -95,8 +86,8 @@ public class CustomGridAdapter extends BaseAdapter {
     TextView rating = grid.findViewById(R.id.text_rating);
     TextView popularity = grid.findViewById(R.id.text_popularity);
     title.setText(movies.get(position).getTitle());
-    rating.setText("("+context.getString(R.string._rating)+": " + movies.get(position).getVote_average() + ")");
-    popularity.setText("("+context.getString(R.string._popularity)+": " + movies.get(position).getPopularity() + ")");
+    rating.setText("("+context.getString(R.string._rating)+": " + (movies != null ? movies.get(position).getVote_average() : "-") + ")");
+    popularity.setText("("+context.getString(R.string._popularity)+": " + (movies !=null ? movies.get(position).getPopularity():"-") + ")");
     grid.setOnClickListener(v -> {
       ShowMovieDetailsActivity.startActivity(context, movies.get(position));
     });

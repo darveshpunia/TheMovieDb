@@ -11,4 +11,6 @@
     <string name="_something_went_wrong_please_try_again">Something went wrong! Please Try Again!</string>
     <string name="_rating">Rating</string>
     <string name="_popularity">Popularity</string>
+    <string name="_ok">OK</string>
+    <string name="_cancel">Cancel</string>
 </resources>
