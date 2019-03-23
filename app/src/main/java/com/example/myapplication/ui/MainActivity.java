@@ -25,6 +25,7 @@ import com.annimon.stream.Stream;
 import com.example.myapplication.R;
 import com.example.myapplication.base.BaseActivity;
 import com.example.myapplication.injection.MovieDbApplication;
+import com.example.myapplication.models.MovieData;
 import com.example.myapplication.models.TheMovieDbObject;
 import com.example.myapplication.networking.DataManager;
 import com.example.myapplication.ui.grid.CustomGridAdapter;
@@ -56,7 +57,7 @@ public class MainActivity extends BaseActivity {
 
   CustomGridAdapter adapter;
   List<CustomGridAdapter.SortOptions> sortOptions;
-  List<TheMovieDbObject.MovieData> movies;
+  List<MovieData> movies;
 
   CustomGridAdapter.SortOptions filterSelected;
 

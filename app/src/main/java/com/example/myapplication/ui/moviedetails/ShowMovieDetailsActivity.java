@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.myapplication.R;
+import com.example.myapplication.models.MovieData;
 import com.example.myapplication.models.TheMovieDbObject;
 import com.example.myapplication.util.Constants;
 import com.google.android.material.appbar.AppBarLayout;
@@ -27,7 +28,7 @@ import org.parceler.Parcels;
 
 public class ShowMovieDetailsActivity extends AppCompatActivity {
 
-  TheMovieDbObject.MovieData movie;
+  MovieData movie;
   final static String MOVIE_DETAILS = "MOVIE_DETAILS";
 
   @BindView(R.id.image)
@@ -54,7 +55,7 @@ public class ShowMovieDetailsActivity extends AppCompatActivity {
     return new Intent(context, ShowMovieDetailsActivity.class);
   }
 
-  public static void startActivity(Context context, TheMovieDbObject.MovieData movieData){
+  public static void startActivity(Context context, MovieData movieData){
     Intent i = getStartActivity(context);
     i.putExtra(MOVIE_DETAILS, Parcels.wrap(movieData));
     context.startActivity(i);

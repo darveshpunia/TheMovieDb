@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.myapplication.R;
+import com.example.myapplication.models.MovieData;
 import com.example.myapplication.models.TheMovieDbObject;
 import com.example.myapplication.ui.MainActivity;
 import com.example.myapplication.ui.moviedetails.ShowMovieDetailsActivity;
@@ -27,10 +28,10 @@ import java.util.concurrent.Callable;
 
 public class CustomGridAdapter extends BaseAdapter {
 
-  List<TheMovieDbObject.MovieData> movies;
+  List<MovieData> movies;
   Context context;
 
-  public CustomGridAdapter(Context context, List<TheMovieDbObject.MovieData> data) {
+  public CustomGridAdapter(Context context, List<MovieData> data) {
     movies = new ArrayList<>(data);
     this.context = context;
   }
@@ -50,7 +51,7 @@ public class CustomGridAdapter extends BaseAdapter {
     }
   }
 
-  public void refreshData(List<TheMovieDbObject.MovieData> movies){
+  public void refreshData(List<MovieData> movies){
     this.movies = new ArrayList<>(movies);
     notifyDataSetChanged();
   }

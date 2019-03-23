@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import com.example.myapplication.R;
 import com.example.myapplication.injection.MovieDbApplication;
+import com.example.myapplication.models.MovieData;
 import com.example.myapplication.models.TheMovieDbObject;
 import com.example.myapplication.models.ApiResponse;
 import com.example.myapplication.repository.MoviesDataRepository;
@@ -28,8 +29,8 @@ public class ShowMoviesViewModel extends AndroidViewModel {
   MoviesDataRepository moviesDataRepository;
   CompositeDisposable compositeDisposable = new CompositeDisposable();
   Context context;
-  private MutableLiveData<ApiResponse<List<TheMovieDbObject.MovieData>>> movieList = new MutableLiveData<>();
-  ApiResponse<List<TheMovieDbObject.MovieData>> dataState;
+  private MutableLiveData<ApiResponse<List<MovieData>>> movieList = new MutableLiveData<>();
+  ApiResponse<List<MovieData>> dataState;
 
   public static String CONNECTION_ISSUE = "CONNECTION_ISSUE";
 
@@ -76,14 +77,14 @@ public class ShowMoviesViewModel extends AndroidViewModel {
     );
   }
 
-  void setDataState(boolean success, List<TheMovieDbObject.MovieData> data, String error){
+  void setDataState(boolean success, List<MovieData> data, String error){
     dataState = new ApiResponse<>();
     dataState.setSuccess(success);
     dataState.setData(data);
     dataState.setError(error);
   }
 
-  public LiveData<ApiResponse<List<TheMovieDbObject.MovieData>>> getMovieList(){
+  public LiveData<ApiResponse<List<MovieData>>> getMovieList(){
     return movieList;
   }
 
