@@ -1,6 +1,9 @@
 package com.example.myapplication.networking;
 
+import com.example.myapplication.models.Review;
+import com.example.myapplication.models.ReviewsModel;
 import com.example.myapplication.models.TheMovieDbObject;
+import com.example.myapplication.models.VideoModel;
 import com.example.myapplication.util.Constants;
 
 import java.util.List;
@@ -18,4 +21,10 @@ public interface ITheMovieDBService {
 
   @GET("movie/top_rated?api_key=" + apiKey)
   Flowable<TheMovieDbObject> getTopRatedMovies(@Query("language") String language, @Query("page") int page);
+
+  @GET("movie/{movie_id}/reviews?api_key=" + apiKey)
+  Flowable<ReviewsModel<Review>> getMovieReviews(@Path("movie_id") int movieId, @Query("language") String language, @Query("page") int page);
+
+  @GET("movie/{movie_id}/videos?api_key=" + apiKey)
+  Flowable<ReviewsModel<VideoModel>> getMovieVideos(@Path("movie_id") int movieId, @Query("language") String language, @Query("page") int page);
 }

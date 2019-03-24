@@ -1,26 +1,39 @@
 package com.example.myapplication.ui.moviedetails;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
 import butterknife.OnClick;
+import io.reactivex.Flowable;
 import io.reactivex.disposables.CompositeDisposable;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.example.myapplication.R;
 import com.example.myapplication.injection.MovieDbApplication;
 import com.example.myapplication.models.MovieData;
+import com.example.myapplication.models.Review;
+import com.example.myapplication.models.ReviewsModel;
 import com.example.myapplication.models.TheMovieDbObject;
+import com.example.myapplication.models.VideoModel;
+import com.example.myapplication.networking.DataManager;
 import com.example.myapplication.room.MovieDao;
 import com.example.myapplication.room.RoomDbRepository;
 import com.example.myapplication.util.Constants;
@@ -33,7 +46,11 @@ import com.squareup.picasso.Picasso;
 
 import org.parceler.Parcels;
 
+import java.util.List;
+
 import javax.inject.Inject;
+
+import static com.example.myapplication.util.Constants.LANGUAGE_US_EN;
 
 public class ShowMovieDetailsActivity extends AppCompatActivity {
 
@@ -61,9 +78,16 @@ public class ShowMovieDetailsActivity extends AppCompatActivity {
   RatingBar ratingBar;
   @BindView(R.id.fab_save_data)
   FloatingActionButton fab;
+  @BindView(R.id.recycler_view)
+  RecyclerView recyclerView;
+
+  @BindView(R.id.recycler_view_trailer)
+  RecyclerView recyclerViewTrailers;
 
   @Inject
   RoomDbRepository<MovieData, MovieDao> roomDbMovieRepository;
+  @Inject
+  DataManager dataManager;
 
   CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -88,6 +112,57 @@ public class ShowMovieDetailsActivity extends AppCompatActivity {
       handleUnexpectedError();
     configureToolbar();
     configureUI();
+    if (Utils.isNetworkAvailable(this))
+      getMovieData();
+  }
+
+  private void getMovieData() {
+    MaterialDialog progress = new MaterialDialog.Builder(this)
+      .title("Please wait...")
+      .content("Loading Data...")
+      .progress(true, 0)
+      .canceledOnTouchOutside(false)
+      .show();
+    compositeDisposable.add(
+      dataManager
+        .getMovieReviews(movie.id, LANGUAGE_US_EN, 1)
+        .subscribe(reviewsModel -> {
+          progress.dismiss();
+          if (reviewsModel.getResults().size() > 0) {
+            findViewById(R.id.reviews_layout).setVisibility(View.VISIBLE);
+            recyclerView.setLayoutManager(new LinearLayoutManager(this));
+            recyclerView.setAdapter(new ReviewsAdapter(this, reviewsModel.getResults()));
+            recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+          }
+        }, ex-> {
+          progress.dismiss();
+          Utils.captureException(ex);
+          Toast.makeText(getApplicationContext(), R.string._something_went_wrong, Toast.LENGTH_LONG).show();
+        })
+    );
+    MaterialDialog progress2 = new MaterialDialog.Builder(this)
+      .title("Please wait...")
+      .content("Loading Data...")
+      .progress(true, 0)
+      .canceledOnTouchOutside(false)
+      .show();
+    compositeDisposable.add(
+      dataManager
+        .getMovieVideos(movie.id, LANGUAGE_US_EN, 1)
+        .subscribe(response -> {
+          progress2.dismiss();
+          if (response.getResults().size() > 0) {
+            findViewById(R.id.trailer_layout).setVisibility(View.VISIBLE);
+            recyclerViewTrailers.setLayoutManager(new LinearLayoutManager(this));
+            recyclerViewTrailers.setAdapter(new TrailersAdapter(this, response.getResults()));
+            recyclerViewTrailers.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+          }
+        }, ex-> {
+          progress2.dismiss();
+          Utils.captureException(ex);
+          Toast.makeText(getApplicationContext(), R.string._something_went_wrong, Toast.LENGTH_LONG).show();
+        })
+    );
   }
 
   private void configureToolbar() {
@@ -167,10 +242,96 @@ public class ShowMovieDetailsActivity extends AppCompatActivity {
     finish();
   }
 
+  public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ViewHolder> {
+    private Context context;
+    private List<Review> reviews;
+
+    public ReviewsAdapter(Context context, List<Review> reviews) {
+      this.context = context;
+      this.reviews = reviews;
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+      View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.review_list_item, parent, false);
+      return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+      holder.title.setText(reviews.get(position).getAuthor());
+      holder.subTitle.setText(reviews.get(position).getContent());
+    }
+
+    @Override
+    public int getItemCount() {
+      return reviews.size();
+    }
+
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+      TextView title;
+      TextView subTitle;
+      ViewHolder(View view) {
+        super(view);
+        title = view.findViewById(R.id.title);
+        subTitle = view.findViewById(R.id.sub_title);
+      }
+    }
+  }
+
+  public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHolder> {
+    private Context context;
+    private List<VideoModel> videos;
+
+    public TrailersAdapter(Context context, List<VideoModel> videos) {
+      this.context = context;
+      this.videos = videos;
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+      View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.review_list_item, parent, false);
+      return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+      holder.title.setText(videos.get(position).getName());
+      holder.subTitle.setVisibility(View.GONE);
+      holder.itemView.setOnClickListener(__ ->{
+        startVideo(videos.get(position).getKey());
+      });
+    }
+
+    void startVideo(String videoId) {
+      Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:"+videoId));
+      intent.putExtra("VIDEO_ID", videoId);
+      startActivity(intent);
+    }
+
+    @Override
+    public int getItemCount() {
+      return videos.size();
+    }
+
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+      TextView title;
+      TextView subTitle;
+      ViewHolder(View view) {
+        super(view);
+        title = view.findViewById(R.id.title);
+        subTitle = view.findViewById(R.id.sub_title);
+      }
+    }
+  }
+
   @Override
   protected void onDestroy() {
     super.onDestroy();
     compositeDisposable.clear();
     roomDbMovieRepository.clearSubscriptions();
   }
+
 }

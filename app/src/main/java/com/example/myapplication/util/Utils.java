@@ -1,6 +1,9 @@
 package com.example.myapplication.util;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
 
@@ -18,5 +21,12 @@ public class Utils {
 
   public static void captureException(Throwable ex){
     ex.printStackTrace();
+  }
+
+  public static boolean isNetworkAvailable(Context context) {
+    ConnectivityManager connectivityManager =
+      (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+    return activeNetworkInfo != null && activeNetworkInfo.isConnected();
   }
 }

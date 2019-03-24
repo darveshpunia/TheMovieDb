@@ -85,7 +85,11 @@ public class CustomGridAdapter extends BaseAdapter {
       grid = (View) convertView;
     }
     ImageView imageView = grid.findViewById(R.id.image);
-    Picasso.get().load(Constants.TMDB_IMAGE_PATH + movies.get(position).getBackdrop_path()).into(imageView);
+    Picasso.get()
+      .load(Constants.TMDB_IMAGE_PATH + movies.get(position).getBackdrop_path())
+      .placeholder(R.drawable.image_placeholder)
+      .error(R.drawable.image_error)
+      .into(imageView);
     TextView title = grid.findViewById(R.id.text_title);
     TextView rating = grid.findViewById(R.id.text_rating);
     TextView popularity = grid.findViewById(R.id.text_popularity);

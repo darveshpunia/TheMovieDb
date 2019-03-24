@@ -1,6 +1,9 @@
 package com.example.myapplication.networking;
 
+import com.example.myapplication.models.Review;
+import com.example.myapplication.models.ReviewsModel;
 import com.example.myapplication.models.TheMovieDbObject;
+import com.example.myapplication.models.VideoModel;
 import com.example.myapplication.repository.MoviesRepository;
 import com.example.myapplication.ui.grid.CustomGridAdapter;
 import com.example.myapplication.util.Constants;
@@ -52,4 +55,19 @@ public class DataManager {
         .observeOn(AndroidSchedulers.mainThread())
         .doOnNext(m -> moviesRepository.add(m, type));
   }
+
+  public Flowable<ReviewsModel<Review>> getMovieReviews(int movieId, String language, int page){
+    return tmdbService
+      .getMovieReviews(movieId, language, page)
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread());
+  }
+
+  public Flowable<ReviewsModel<VideoModel>> getMovieVideos(int movieId, String language, int page){
+    return tmdbService
+      .getMovieVideos(movieId, language, page)
+      .subscribeOn(Schedulers.io())
+      .observeOn(AndroidSchedulers.mainThread());
+  }
+
 }

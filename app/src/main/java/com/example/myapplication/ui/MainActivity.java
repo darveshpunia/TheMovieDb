@@ -59,24 +59,16 @@ public class MainActivity extends BaseActivity {
   TextView textErrorMessage;
 
   boolean dataLoaded;
-
   CustomGridAdapter adapter;
   List<CustomGridAdapter.SortOptions> sortOptions;
-  List<MovieData> movies;
-
-  CustomGridAdapter favAdapter;
-  List<MovieData> favMovies;
-
-  List<MovieData> allMovies;
+  List<MovieData> movies, favMovies, allMovies;
   List<Integer> favIds;
-
   CustomGridAdapter.SortOptions filterSelected;
   ShowMoviesViewModel showMoviesViewModel;
+  CompositeDisposable compositeDisposable = new CompositeDisposable();
 
   @Inject
   RoomDbRepository<MovieData, MovieDao> roomDbMovieRepository;
-
-  CompositeDisposable compositeDisposable = new CompositeDisposable();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
