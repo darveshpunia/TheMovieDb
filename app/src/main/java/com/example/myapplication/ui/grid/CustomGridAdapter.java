@@ -29,10 +29,12 @@ import java.util.concurrent.Callable;
 public class CustomGridAdapter extends BaseAdapter {
 
   List<MovieData> movies;
+  List<Integer> favList;
   Context context;
 
-  public CustomGridAdapter(Context context, List<MovieData> data) {
+  public CustomGridAdapter(Context context, List<MovieData> data, List<Integer> fav) {
     movies = new ArrayList<>(data);
+    favList = new ArrayList<>(fav);
     this.context = context;
   }
 
@@ -51,8 +53,9 @@ public class CustomGridAdapter extends BaseAdapter {
     }
   }
 
-  public void refreshData(List<MovieData> movies){
+  public void refreshData(List<MovieData> movies, List<Integer> fav){
     this.movies = new ArrayList<>(movies);
+    this.favList = new ArrayList<>(fav);
     notifyDataSetChanged();
   }
 
@@ -92,6 +95,11 @@ public class CustomGridAdapter extends BaseAdapter {
     grid.setOnClickListener(v -> {
       ShowMovieDetailsActivity.startActivity(context, movies.get(position));
     });
+    if (favList.indexOf(movies.get(position).getId()) != -1){
+      grid.findViewById(R.id.text_fav_tag).setVisibility(View.VISIBLE);
+    } else {
+      grid.findViewById(R.id.text_fav_tag).setVisibility(View.GONE);
+    }
     return grid;
   }
 }

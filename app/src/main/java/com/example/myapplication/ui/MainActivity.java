@@ -1,5 +1,6 @@
 package com.example.myapplication.ui;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 import butterknife.BindView;
@@ -22,16 +23,20 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.annimon.stream.Stream;
+import com.annimon.stream.function.Function;
 import com.example.myapplication.R;
 import com.example.myapplication.base.BaseActivity;
 import com.example.myapplication.injection.MovieDbApplication;
 import com.example.myapplication.models.MovieData;
 import com.example.myapplication.models.TheMovieDbObject;
 import com.example.myapplication.networking.DataManager;
+import com.example.myapplication.room.MovieDao;
+import com.example.myapplication.room.RoomDbRepository;
 import com.example.myapplication.ui.grid.CustomGridAdapter;
 import com.example.myapplication.ui.moviedetails.ShowMovieDetailsActivity;
 import com.example.myapplication.util.Constants;
 import com.example.myapplication.util.StringUtils;
+import com.example.myapplication.util.Utils;
 import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
@@ -59,9 +64,19 @@ public class MainActivity extends BaseActivity {
   List<CustomGridAdapter.SortOptions> sortOptions;
   List<MovieData> movies;
 
-  CustomGridAdapter.SortOptions filterSelected;
+  CustomGridAdapter favAdapter;
+  List<MovieData> favMovies;
 
+  List<MovieData> allMovies;
+  List<Integer> favIds;
+
+  CustomGridAdapter.SortOptions filterSelected;
   ShowMoviesViewModel showMoviesViewModel;
+
+  @Inject
+  RoomDbRepository<MovieData, MovieDao> roomDbMovieRepository;
+
+  CompositeDisposable compositeDisposable = new CompositeDisposable();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -74,23 +89,43 @@ public class MainActivity extends BaseActivity {
     filterSelected = CustomGridAdapter.SortOptions.POPULARITY;
     sortOptions = new ArrayList<>(Arrays.asList(CustomGridAdapter.SortOptions.values()));
     showMoviesViewModel = ViewModelProviders.of(this).get(ShowMoviesViewModel.class);
-    setUpViewMode();
+    //setUpFavoritesView();
+    setUpViewModel();
     getMovies();
   }
 
-  private void setUpViewMode() {
+
+  private void setUpFavoritesView() {
+    compositeDisposable.add(
+      roomDbMovieRepository
+        .getAll()
+        .subscribe(movieList -> {
+          favMovies = new ArrayList<>(movieList);
+          favIds = new ArrayList<>(Stream.of(favMovies).map(MovieData::getId).toList());
+          movies = new ArrayList<>(favMovies);
+          if (allMovies != null) {
+            movies.addAll(Stream.of(allMovies).filter(m -> favIds.indexOf(m.getId()) == -1).toList());
+          }
+          if (adapter == null) {
+            adapter = new CustomGridAdapter(this, movies, favIds);
+            gridView.setAdapter(adapter);
+            gridView.setVisibility(View.VISIBLE);
+          } else
+            adapter.refreshData(movies, favIds);
+        })
+    );
+  }
+
+  private void setUpViewModel() {
+    setUpFavoritesView();
     showMoviesViewModel.getMovieList().observe(this, items -> {
       if (items.isSuccess()) {
+        compositeDisposable.clear();
+        allMovies = new ArrayList<>(items.getData());
+        setUpFavoritesView();
         progressBar.setVisibility(View.GONE);
-        gridView.setVisibility(View.VISIBLE);
         dataLoaded = true;
         invalidateOptionsMenu();
-        if (adapter == null) {
-          adapter = new CustomGridAdapter(this, items.getData());
-          gridView.setAdapter(adapter);
-        } else
-          adapter.refreshData(items.getData());
-        movies = new ArrayList<>(items.getData());
       } else if (items.getError().equals(CONNECTION_ISSUE)) {
         handleLayout(true, null);
       } else {
@@ -99,16 +134,20 @@ public class MainActivity extends BaseActivity {
     });
   }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-  }
-
   void handleLayout(boolean showErrorLayout, String errorMessage){
-    layoutInternetIssue.setVisibility(showErrorLayout ? View.VISIBLE : View.GONE);
-    progressBar.setVisibility(!showErrorLayout ? View.VISIBLE : View.GONE);
-    if (!StringUtils.nullOrEmpty(errorMessage)) {
-      textErrorMessage.setText(errorMessage);
+    if (showErrorLayout) {
+      MaterialDialog dialog = new MaterialDialog.Builder(this)
+        .title("Error")
+        .content(StringUtils.nullOrEmpty(errorMessage) ? getString(R.string.no_internet): errorMessage)
+        .positiveText("Try Again")
+        .negativeText("Use Offline")
+        .onPositive((__, ___) -> getMovies())
+        .onNegative((dialog1, ___) -> {
+          dialog1.dismiss();
+          progressBar.setVisibility(View.GONE);
+        })
+        .canceledOnTouchOutside(false)
+        .show();
     }
   }
 
@@ -121,6 +160,8 @@ public class MainActivity extends BaseActivity {
   @Override
   protected void onDestroy() {
     super.onDestroy();
+    compositeDisposable.clear();
+    roomDbMovieRepository.clearSubscriptions();
   }
 
   @Override
@@ -158,7 +199,8 @@ public class MainActivity extends BaseActivity {
 
   void getTopRatedMovies(){
     progressBar.setVisibility(View.VISIBLE);
-    gridView.setVisibility(View.GONE);
+    if (favMovies.size() == 0)
+      gridView.setVisibility(View.GONE);
     showMoviesViewModel.getTopRatedMovies(Constants.LANGUAGE_US_EN, Constants.POPULAR_MOVIES_PAGE);
   }
 

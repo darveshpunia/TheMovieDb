@@ -13,4 +13,7 @@
     <string name="_popularity">Popularity</string>
     <string name="_ok">OK</string>
     <string name="_cancel">Cancel</string>
+    <string name="_favorites">Favorite</string>
+    <string name="_new">New Movies</string>
+    <string name="no_internet">No Internet!</string>
 </resources>

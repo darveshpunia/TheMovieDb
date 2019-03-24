@@ -14,17 +14,26 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.Toolbar;
+import butterknife.OnClick;
+import io.reactivex.disposables.CompositeDisposable;
 
 import com.example.myapplication.R;
+import com.example.myapplication.injection.MovieDbApplication;
 import com.example.myapplication.models.MovieData;
 import com.example.myapplication.models.TheMovieDbObject;
+import com.example.myapplication.room.MovieDao;
+import com.example.myapplication.room.RoomDbRepository;
 import com.example.myapplication.util.Constants;
+import com.example.myapplication.util.Utils;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
 
 import org.parceler.Parcels;
+
+import javax.inject.Inject;
 
 public class ShowMovieDetailsActivity extends AppCompatActivity {
 
@@ -50,6 +59,13 @@ public class ShowMovieDetailsActivity extends AppCompatActivity {
   TextView textReleaseDate;
   @BindView(R.id.rating_bar)
   RatingBar ratingBar;
+  @BindView(R.id.fab_save_data)
+  FloatingActionButton fab;
+
+  @Inject
+  RoomDbRepository<MovieData, MovieDao> roomDbMovieRepository;
+
+  CompositeDisposable compositeDisposable = new CompositeDisposable();
 
   public static Intent getStartActivity(Context context){
     return new Intent(context, ShowMovieDetailsActivity.class);
@@ -66,6 +82,7 @@ public class ShowMovieDetailsActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_show_movie_details);
     ButterKnife.bind(this);
+    ((MovieDbApplication) getApplication()).getAppComponent().inject(this);
     movie = Parcels.unwrap(getIntent().getParcelableExtra(MOVIE_DETAILS));
     if (movie == null)
       handleUnexpectedError();
@@ -116,6 +133,33 @@ public class ShowMovieDetailsActivity extends AppCompatActivity {
     textRating.setText("(" + String.valueOf(movie.getVote_average()/2) + ")");
     textOverview.setText(movie.getOverview());
     ratingBar.setRating(movie.getVote_average() / 2);
+    compositeDisposable.add(
+      roomDbMovieRepository
+        .get(movie.getId())
+        .subscribe(movie -> {
+          fab.setImageResource(R.drawable.ic_favorite_black_24dp);
+        }, Utils::captureException)
+    );
+  }
+
+  @OnClick(R.id.fab_save_data)
+  void saveDataInRoom(){
+    compositeDisposable.add(
+      roomDbMovieRepository
+        .get(movie.getId())
+        .subscribe(movie -> {
+            roomDbMovieRepository.delete(movie.getId(), ()->{
+              Toast.makeText(getApplicationContext(), "Movie removed from Favorites", Toast.LENGTH_LONG).show();
+              fab.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+            });
+        }, Utils::captureException,
+        () -> {
+          roomDbMovieRepository.insert(movie, () -> {
+            Toast.makeText(getApplicationContext(), "Movie added to Favorites", Toast.LENGTH_LONG).show();
+            fab.setImageResource(R.drawable.ic_favorite_black_24dp);
+          });
+        })
+    );
   }
 
   void handleUnexpectedError(){
@@ -123,4 +167,10 @@ public class ShowMovieDetailsActivity extends AppCompatActivity {
     finish();
   }
 
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    compositeDisposable.clear();
+    roomDbMovieRepository.clearSubscriptions();
+  }
 }

@@ -1,8 +1,12 @@
 package com.example.myapplication.injection;
 
 import com.example.myapplication.BuildConfig;
+import com.example.myapplication.models.MovieData;
 import com.example.myapplication.networking.ITheMovieDBService;
 import com.example.myapplication.repository.MoviesRepository;
+import com.example.myapplication.room.MovieDao;
+import com.example.myapplication.room.RoomDB;
+import com.example.myapplication.room.RoomDbRepository;
 import com.example.myapplication.util.Constants;
 
 import java.net.InetSocketAddress;
@@ -11,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Singleton;
 
+import androidx.room.Room;
 import dagger.Module;
 import dagger.Provides;
 import okhttp3.OkHttpClient;
@@ -33,7 +38,7 @@ public class NetworkModule {
     HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
     logging.setLevel(BuildConfig.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
     //added since the website was not working at my end
-//    java.net.Proxy proxy = new Proxy(Proxy.Type.HTTP,  new InetSocketAddress("198.211.108.71", 9000));
+    java.net.Proxy proxy = new Proxy(Proxy.Type.HTTP,  new InetSocketAddress("198.211.108.71", 9000));
     return new OkHttpClient.Builder()
 //        .proxy(proxy)
         .addInterceptor(logging)
@@ -64,4 +69,24 @@ public class NetworkModule {
   MoviesRepository provideMovieRepo() {
     return new MoviesRepository();
   }
+
+  @Singleton
+  @Provides
+  RoomDB provideRoomDB() {
+    return Room.databaseBuilder(application.getApplicationContext(), RoomDB.class, RoomDB.DATABASE_NAME)
+      .fallbackToDestructiveMigration()
+      .build();
+  }
+
+  @Singleton
+  @Provides
+  MovieDao providePatientDao(RoomDB roomDB) {
+    return roomDB.movieDao();
+  }
+
+  @Provides
+  RoomDbRepository<MovieData, MovieDao> provideRoomDbPatientRepository(MovieDao dao) {
+    return new RoomDbRepository<>(dao);
+  }
+
 }

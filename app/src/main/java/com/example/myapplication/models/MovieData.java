@@ -4,22 +4,28 @@ import org.parceler.Parcel;
 
 import java.util.List;
 
-@Parcel
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
+@Parcel @Entity
 public class MovieData{
-  int vote_count;
-  int id;
-  boolean video;
-  float vote_average;
-  String title;
-  float popularity;
-  String poster_path;
-  String original_language;
-  String original_title;
+  public int vote_count;
+  @PrimaryKey
+  public int id;
+  public boolean video;
+  public float vote_average;
+  public String title;
+  public float popularity;
+  public String poster_path;
+  public String original_language;
+  public String original_title;
+  @Ignore
   List<Integer> genre_ids;
-  String backdrop_path;
-  boolean adult;
-  String overview;
-  String release_date;
+  public String backdrop_path;
+  public boolean adult;
+  public String overview;
+  public String release_date;
 
   public int getVote_count() {
     return vote_count;

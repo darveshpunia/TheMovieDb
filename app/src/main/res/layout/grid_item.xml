@@ -18,11 +18,40 @@
             android:paddingBottom="5dp"
             android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/image"
+            <!--<ImageView-->
+                <!--android:id="@+id/image"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="250dp"-->
+                <!--android:scaleType="centerCrop"-->
+                <!--android:contentDescription="image" />-->
+
+            <RelativeLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/image_layout"
                 android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:scaleType="centerCrop" />
+                android:layout_height="250dp" >
+
+                <ImageView
+                    android:id="@+id/image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="image" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:visibility="gone"
+                    android:id="@+id/text_fav_tag"
+                    android:padding="10dp"
+                    android:background="@color/colorPrimaryDark"
+                    android:textColor="#fff"
+                    android:textStyle="bold"
+                    android:text="@string/_favorites"
+                    android:textAlignment="center"/>
+
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/text_title"
