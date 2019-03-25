@@ -16,4 +16,7 @@
     <string name="_favorites">Favorite</string>
     <string name="_new">New Movies</string>
     <string name="no_internet">No Internet!</string>
+    <string name="_try_again">Try Again</string>
+    <string name="_use_offline">Use Offline</string>
+    <string name="_error">Error</string>
 </resources>

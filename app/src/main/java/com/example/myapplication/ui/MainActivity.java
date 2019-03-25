@@ -111,28 +111,31 @@ public class MainActivity extends BaseActivity {
   private void setUpViewModel() {
     setUpFavoritesView();
     showMoviesViewModel.getMovieList().observe(this, items -> {
-      if (items.isSuccess()) {
-        compositeDisposable.clear();
-        allMovies = new ArrayList<>(items.getData());
-        setUpFavoritesView();
-        progressBar.setVisibility(View.GONE);
-        dataLoaded = true;
-        invalidateOptionsMenu();
-      } else if (items.getError().equals(CONNECTION_ISSUE)) {
-        handleLayout(true, null);
-      } else {
+      if (items != null) {
+        if (items.isSuccess()) {
+          compositeDisposable.clear();
+          allMovies = new ArrayList<>(items.getData());
+          setUpFavoritesView();
+          progressBar.setVisibility(View.GONE);
+          dataLoaded = true;
+          invalidateOptionsMenu();
+        } else if (items.getError().equals(CONNECTION_ISSUE)) {
+          handleLayout(true, null);
+        } else {
+          handleLayout(true, getString(R.string._something_went_wrong_please_try_again));
+        }
+      } else
         handleLayout(true, getString(R.string._something_went_wrong_please_try_again));
-      }
     });
   }
 
   void handleLayout(boolean showErrorLayout, String errorMessage){
     if (showErrorLayout) {
-      MaterialDialog dialog = new MaterialDialog.Builder(this)
-        .title("Error")
+      new MaterialDialog.Builder(this)
+        .title(R.string._error)
         .content(StringUtils.nullOrEmpty(errorMessage) ? getString(R.string.no_internet): errorMessage)
-        .positiveText("Try Again")
-        .negativeText("Use Offline")
+        .positiveText(R.string._try_again)
+        .negativeText(R.string._use_offline)
         .onPositive((__, ___) -> getMovies())
         .onNegative((dialog1, ___) -> {
           dialog1.dismiss();
